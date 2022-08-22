@@ -1,0 +1,141 @@
+---
+title: "Breast Cancer"
+author: "Agustin Luengo"
+date: '2022-08-18'
+output: html_document
+---
+
+## The objective of this analysis is to find the statistical parameters necessary to suspect that a tumor is malignant and, additionnaly use algorithms to categorize the tumors according to their features.
+
+### The dataset used for this analysis is available on Kaggle <https://www.kaggle.com/datasets/uciml/breast-cancer-wisconsin-data>
+
+
+
+### The first step is charge the packages and the dataset
+```{r,warning=FALSE ,results='hide'}
+library(tidyverse)
+library(ggcorrplot)
+library(GGally)
+library(R.matlab)
+library(VCA)
+library(devtools)
+library(factoextra)
+library(htmlwidgets)
+library(readxl)
+data <- read_csv("C:/Users/Agustin/Desktop/DA/dataset/breast_cancer2_files/breast_cancer.csv")
+
+```
+
+
+```{r}
+data2 <- data %>% as_tibble() %>% unique()
+sum(is.na(data2[1:32]))
+```
+
+### The second step is to rid of duplicates and 
+```{r, echo=FALSE,warning=FALSE}
+#data2<- data2$diagnosis[data2$diagnosis %in% c("B")] <- 1
+#data2<- data2$diagnosis[data2$diagnosis %in% c("M")] <- 0
+
+#data2$diagnosis <- as.factor(data2$diagnosis)
+data_mean<- data2 %>%
+  select(ends_with("mean")) %>% 
+  select(-"radius_mean",-"area_mean")
+
+data_mean_m <- data2 %>% filter(., diagnosis == "M") %>% select(ends_with("mean")) %>% select(-"radius_mean",-"area_mean")
+
+data_se <- data2 %>% 
+  select(ends_with("se")) %>% 
+  select(-"radius_se",-"area_se")
+
+data_se_m <- data2 %>%  filter(., diagnosis == "M") %>% select(ends_with("se")) %>% select(-"radius_se",-"area_se")
+
+data_worst <- data2 %>% 
+  select(ends_with("worst")) %>% 
+  select(-"radius_worst",-"area_worst")
+
+data_worst_m <- data2 %>%  filter(., diagnosis == "M") %>% select(ends_with("worst")) %>% select(-"radius_worst",-"area_worst")
+```
+
+```{r, echo=FALSE}
+str(data_mean)
+```
+
+```{r}
+cor <- cor(data_mean)
+p.mat <- cor_pmat(cor)
+
+ggcorrplot(cor,
+       method = "square",
+       type = "lower",
+       hc.order =TRUE,
+       lab =TRUE)
+```
+
+```{r, echo=FALSE}
+summary(data_mean)
+```
+```{r, echo=FALSE}
+summary(data_mean_m)
+```
+
+```{r, echo=FALSE}
+data2 %>% ggplot(aes(x=perimeter_mean,
+                                   fill=diagnosis)) + geom_histogram(col="black") +
+  labs(x= "perimeter (mean)",
+       y= "") +
+  scale_fill_discrete(labels=c('Benign', 'Malign'))
+```
+
+
+```{r, echo=FALSE}
+data2 %>% ggplot(aes(y=compactness_mean,
+                                   fill=diagnosis)) + geom_boxplot(col="black") +
+  labs(x= "compactness (mean)",
+       y= "") +
+  scale_fill_discrete(labels=c('Benign', 'Malign'))
+```
+
+```{r, echo=FALSE}
+data2 %>% 
+  ggplot(aes(x=concavity_mean,
+             y=compactness_mean,
+             col=diagnosis,)) +
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE, col="black") +
+  labs(title = " compactness (mean) x perimeter (mean)",
+       x= 'compactness (mean)',
+       y= 'perimeter (mean)')+
+  scale_fill_discrete(labels=c('Benign', 'Malign'))
+```
+
+```{r, echo=FALSE}
+data2 %>% 
+  ggplot(aes(x=perimeter_mean,
+             y=`concave points_mean`,
+             col=diagnosis,)) +
+  geom_jitter() + 
+  geom_smooth(method = "lm", se = FALSE, col="black") +
+  labs(title = "perimeter (mean) x concavity (mean)",
+       x= 'perimeter (mean)',
+       y= 'concave points (mean)')+
+  scale_fill_discrete(labels=c('Benign', 'Malign'))
+```
+
+```{r, echo=FALSE}
+data2 %>% 
+  ggplot(aes(x=compactness_mean,
+             y=concavity_mean,
+             col=diagnosis,)) +
+  geom_jitter() + 
+  geom_smooth(method = "lm", se = FALSE, col="black") +
+  labs(title = "perimeter (mean) x concavity (mean)",
+       x= 'perimeter (mean)',
+       y= 'concave points (mean)')+
+  scale_fill_discrete(labels=c('Benign', 'Malign'))
+```
+
+```{r}
+
+```
+
